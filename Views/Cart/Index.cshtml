@@ -1,0 +1,130 @@
+﻿@model ForUpworkRestaurentManagement.ViewModels.CartViewModel
+@{
+    ViewData["Title"] = "Shopping Cart";
+}
+
+<div class="container">
+    <div class="row">
+        <div class="col-12">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a asp-controller="Home" asp-action="Index">Home</a></li>
+                    <li class="breadcrumb-item"><a asp-controller="Menu" asp-action="Index">Menu</a></li>
+                    <li class="breadcrumb-item active">Shopping Cart</li>
+                </ol>
+            </nav>
+        </div>
+    </div>
+
+    <h1 class="mb-4">Shopping Cart</h1>
+
+    @if (Model.Items.Any())
+    {
+        <div class="row">
+            <div class="col-lg-8">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">Cart Items (@Model.Items.Sum(i => i.Quantity) items)</h5>
+                    </div>
+                    <div class="card-body">
+                        @foreach (var item in Model.Items)
+                        {
+                            <div class="cart-item row align-items-center mb-4 pb-4 border-bottom">
+                                <div class="col-md-2">
+                                    @if (!string.IsNullOrEmpty(item.ImageUrl))
+                                    {
+                                        <img src="@item.ImageUrl" alt="@item.Name" class="img-fluid rounded" style="height: 80px; object-fit: cover;">
+                                    }
+                                    else
+                                    {
+                                        <div class="bg-secondary text-white rounded d-flex align-items-center justify-content-center" style="height: 80px;">
+                                            <i class="fas fa-utensils fa-2x"></i>
+                                        </div>
+                                    }
+                                </div>
+                                <div class="col-md-4">
+                                    <h6 class="mb-1">@item.Name</h6>
+                                    <p class="text-muted mb-0">$@item.Price.ToString("F2") each</p>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="input-group input-group-sm">
+                                        <form asp-action="UpdateCart" method="post" class="d-flex">
+                                            <input type="hidden" name="menuItemId" value="@item.MenuItemId" />
+                                            <button type="submit" name="quantity" value="@(item.Quantity - 1)"
+                                                    class="btn btn-outline-secondary @(item.Quantity <= 1 ? "disabled" : "")">
+                                                <i class="fas fa-minus"></i>
+                                            </button>
+                                            <input type="text" class="form-control text-center mx-2" value="@item.Quantity" readonly style="width: 60px;">
+                                            <button type="submit" name="quantity" value="@(item.Quantity + 1)"
+                                                    class="btn btn-outline-secondary">
+                                                <i class="fas fa-plus"></i>
+                                            </button>
+                                        </form>
+                                    </div>
+                                </div>
+                                <div class="col-md-2 text-center">
+                                    <strong>$@item.TotalPrice.ToString("F2")</strong>
+                                </div>
+                                <div class="col-md-1 text-end">
+                                    <form asp-action="RemoveFromCart" method="post">
+                                        <input type="hidden" name="menuItemId" value="@item.MenuItemId" />
+                                        <button type="submit" class="btn btn-outline-danger btn-sm">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </form>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-4">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">Order Summary</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between mb-2">
+                            <span>Subtotal:</span>
+                            <span>$@Model.TotalAmount.ToString("F2")</span>
+                        </div>
+                        <div class="d-flex justify-content-between mb-2">
+                            <span>Delivery Fee:</span>
+                            <span>$2.99</span>
+                        </div>
+                        <div class="d-flex justify-content-between mb-3">
+                            <span>Tax:</span>
+                            <span>$@((Model.TotalAmount * 0.1m).ToString("F2"))</span>
+                        </div>
+                        <hr>
+                        <div class="d-flex justify-content-between mb-3">
+                            <strong>Total:</strong>
+                            <strong>$@((Model.TotalAmount + 2.99m + (Model.TotalAmount * 0.1m)).ToString("F2"))</strong>
+                        </div>
+
+                        <div class="d-grid gap-2">
+                            <a asp-controller="Orders" asp-action="Create" class="btn btn-primary btn-lg">
+                                <i class="fas fa-shopping-bag"></i> Proceed to Checkout
+                            </a>
+                            <a asp-controller="Menu" asp-action="Index" class="btn btn-outline-primary">
+                                <i class="fas fa-utensils"></i> Continue Shopping
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+    else
+    {
+        <div class="text-center py-5">
+            <i class="fas fa-shopping-cart fa-3x text-muted mb-3"></i>
+            <h3>Your cart is empty</h3>
+            <p class="text-muted mb-4">Add some delicious items from our menu to get started.</p>
+            <a asp-controller="Menu" asp-action="Index" class="btn btn-primary btn-lg">
+                <i class="fas fa-utensils"></i> Browse Menu
+            </a>
+        </div>
+    }
+</div>

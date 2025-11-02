@@ -1,0 +1,173 @@
+﻿@model ForUpworkRestaurentManagement.ViewModels.OrderViewModel
+@{
+    ViewData["Title"] = "Order Details";
+}
+
+<div class="container">
+    <div class="row">
+        <div class="col-12">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a asp-controller="Home" asp-action="Index">Home</a></li>
+                    <li class="breadcrumb-item"><a asp-action="Index">Orders</a></li>
+                    <li class="breadcrumb-item active">Order #@Model.Id</li>
+                </ol>
+            </nav>
+        </div>
+    </div>
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1>Order #@Model.Id</h1>
+        <div>
+            @{
+                var statusClass = Model.Status switch
+                {
+                    "Pending" => "warning",
+                    "Confirmed" => "info",
+                    "Preparing" => "primary",
+                    "ReadyForPickup" => "success",
+                    "Delivered" => "success",
+                    "Cancelled" => "danger",
+                    _ => "secondary"
+                };
+            }
+            <span class="badge bg-@statusClass fs-6">@Model.Status</span>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-12">
+            @await Html.PartialAsync("_OrderTracker", Model)
+        </div>
+        <div class="col-lg-8">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">Order Items</h5>
+                </div>
+                <div class="card-body">
+                    @foreach (var item in Model.OrderItems)
+                    {
+                        <div class="d-flex justify-content-between align-items-center mb-3 pb-3 border-bottom">
+                            <div>
+                                <h6 class="mb-1">@item.MenuItemName</h6>
+                                <small class="text-muted">Qty: @item.Quantity × $@item.UnitPrice.ToString("F2")</small>
+                            </div>
+                            <strong>$@item.TotalPrice.ToString("F2")</strong>
+                        </div>
+                    }
+
+                    <div class="row mt-4">
+                        <div class="col-md-6">
+                            <h6>Delivery Address</h6>
+                            <p class="text-muted">@Model.DeliveryAddress</p>
+                        </div>
+                        <div class="col-md-6">
+                            @if (!string.IsNullOrEmpty(Model.Notes))
+                            {
+                                <h6>Special Instructions</h6>
+                                <p class="text-muted">@Model.Notes</p>
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">Order Summary</h5>
+                </div>
+                <div class="card-body">
+                    <div class="d-flex justify-content-between mb-2">
+                        <span>Order Date:</span>
+                        <span>@Model.OrderDate.ToString("MMM dd, yyyy h:mm tt")</span>
+                    </div>
+                    @if (User.IsInRole("Admin"))
+                    {
+                        <div class="d-flex justify-content-between mb-2">
+                            <span>Customer:</span>
+                            <span>@Model.UserName</span>
+                        </div>
+                    }
+                    <hr>
+                    <div class="d-flex justify-content-between mb-2">
+                        <span>Subtotal:</span>
+                        <span>$@Model.TotalAmount.ToString("F2")</span>
+                    </div>
+                    <div class="d-flex justify-content-between mb-2">
+                        <span>Delivery Fee:</span>
+                        <span>$2.99</span>
+                    </div>
+                    <div class="d-flex justify-content-between mb-3">
+                        <span>Tax:</span>
+                        <span>$@((Model.TotalAmount * 0.1m).ToString("F2"))</span>
+                    </div>
+                    <hr>
+                    <div class="d-flex justify-content-between mb-3">
+                        <strong>Total:</strong>
+                        <strong>$@((Model.TotalAmount + 2.99m + (Model.TotalAmount * 0.1m)).ToString("F2"))</strong>
+                    </div>
+                </div>
+            </div>
+
+            @if (User.IsInRole("Admin"))
+            {
+                <div class="card mt-4">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">Update Status</h5>
+                    </div>
+                    <div class="card-body">
+                        <form asp-action="UpdateStatus" method="post">
+                            <input type="hidden" name="id" value="@Model.Id" />
+                            <div class="mb-3">
+                                <select name="status" class="form-select">
+                                    @foreach (var status in Enum.GetValues(typeof(ForUpworkRestaurentManagement.Models.OrderStatus)))
+                                    {
+                                        <option value="@status" selected="@(status.ToString() == Model.Status)">@status</option>
+                                    }
+                                </select>
+                            </div>
+                            <button type="submit" class="btn btn-primary w-100">Update Status</button>
+                        </form>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/7.0.5/signalr.min.js"></script>
+    <script>
+        (function(){
+            const orderId = '@Model.Id';
+            const connection = new signalR.HubConnectionBuilder()
+                .withUrl('/hubs/driver-tracking')
+                .withAutomaticReconnect()
+                .build();
+
+            function updateMap(lat, lng){
+                const overlay = document.querySelector('.map-overlay');
+                if (overlay){ overlay.innerHTML = `<i class="fas fa-motorcycle fa-2x"></i><span> Driver: ${lat.toFixed(4)}, ${lng.toFixed(4)}</span>`; }
+            }
+            function updateStepper(status){
+                document.querySelectorAll('.tracker-step').forEach(step => {
+                    const label = step.querySelector('.label')?.textContent?.trim();
+                    if (!label) return;
+                    const order = ['Pending','Confirmed','Preparing','ReadyForPickup','Delivered'];
+                    if (order.indexOf(label) <= order.indexOf(status)){
+                        step.classList.add('active');
+                    }
+                });
+            }
+
+            connection.on('DriverLocationUpdated', pos => updateMap(pos.lat, pos.lng));
+            connection.on('OrderStatusUpdated', status => updateStepper(status));
+
+            connection.start().then(() => {
+                connection.invoke('JoinOrderGroup', String(orderId));
+            }).catch(console.error);
+        })();
+    </script>
+}

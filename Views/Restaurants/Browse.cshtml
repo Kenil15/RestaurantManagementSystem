@@ -1,0 +1,40 @@
+@model IEnumerable<ForUpworkRestaurentManagement.Models.Restaurant>
+@{
+    ViewData["Title"] = "Restaurants";
+}
+<div class="container py-4">
+    <h2 class="mb-4">Restaurants</h2>
+    <div class="row g-4">
+        @foreach (var r in Model)
+        {
+            <div class="col-md-4">
+                <div class="card h-100 shadow-sm">
+                    @if (!string.IsNullOrWhiteSpace(r.ImageUrl))
+                    {
+                        <img src="@r.ImageUrl" class="card-img-top" alt="@r.Name" style="object-fit: cover; height: 180px;">
+                    }
+                    <div class="card-body d-flex flex-column">
+                        <h5 class="card-title mb-1">@r.Name</h5>
+                        <div class="text-muted small mb-2">@r.Location</div>
+                        <p class="card-text flex-grow-1">@r.Description</p>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <span class="badge bg-@(IsOpen(r) ? "success" : "secondary")">@(IsOpen(r) ? "Open Now" : "Closed")</span>
+                            <a class="btn btn-primary" href="@Url.Action("Restaurant", "Menu", new { id = r.Id })">View Menu</a>
+                        </div>
+                    </div>
+                    <div class="card-footer small text-muted">
+                        Hours: @r.OpeningTime.ToString(@"hh\:mm") - @r.ClosingTime.ToString(@"hh\:mm")
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+</div>
+
+@functions {
+    private bool IsOpen(ForUpworkRestaurentManagement.Models.Restaurant r)
+    {
+        var now = DateTime.Now.TimeOfDay;
+        return now >= r.OpeningTime && now <= r.ClosingTime;
+    }
+}

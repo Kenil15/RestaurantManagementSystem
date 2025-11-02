@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - Restaurant Ordering System</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    @await RenderSectionAsync("Styles", required: false)
+</head>
+<body>
+    <header>
+        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-dark bg-dark border-bottom box-shadow mb-3">
+            <div class="container">
+                <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">
+                    <i class="fas fa-utensils"></i> Restaurant Ordering System
+                </a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
+                    <ul class="navbar-nav flex-grow-1">
+                        <li class="nav-item">
+                            <a class="nav-link" asp-controller="Home" asp-action="Index">Home</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" asp-controller="Restaurants" asp-action="Browse">Restaurants</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" asp-controller="Orders" asp-action="Index">Orders</a>
+                        </li>
+                        @if (User.Identity?.IsAuthenticated ?? false)
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link" asp-controller="Bookings" asp-action="Index">My Bookings</a>
+                            </li>
+                        }
+                        @if (User.IsInRole("Admin"))
+                        {
+                            <li class="nav-item dropdown">
+                                <a class="nav-link dropdown-toggle" href="#" id="adminDropdown" role="button" data-bs-toggle="dropdown">
+                                    Admin
+                                </a>
+                                <ul class="dropdown-menu">
+                                    <li><a class="dropdown-item" asp-controller="Menu" asp-action="Manage">Manage Menu</a></li>
+                                    <li><a class="dropdown-item" asp-controller="Admin" asp-action="Bookings">Table Bookings</a></li>
+                                    <li><a class="dropdown-item" asp-controller="Orders" asp-action="Index">View Orders</a></li>
+                                </ul>
+                            </li>
+                        }
+                    </ul>
+
+                    <!-- Use the _LoginPartial here -->
+                    <partial name="_LoginPartial" />
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <div class="container">
+        <main role="main" class="pb-3">
+            @if (TempData["Success"] != null)
+            {
+                <div class="alert alert-success alert-dismissible fade show" role="alert">
+                    @TempData["Success"]
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            }
+            @if (TempData["Error"] != null)
+            {
+                <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                    @TempData["Error"]
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            }
+            @RenderBody()
+        </main>
+    </div>
+
+    <footer class="footer mt-auto text-light pt-5 pb-3" style="background: linear-gradient(135deg, #0d6efd, #6610f2);">
+        <div class="container">
+            <div class="row">
+                <!-- About Section -->
+                <div class="col-md-4 mb-4">
+                    <h5 class="fw-bold"><i class="fas fa-utensils me-2"></i>Restaurant Ordering System</h5>
+                    <p class="small">
+                        Experience the best dining from your home! Order delicious meals from your favorite restaurants and get them delivered hot & fresh.
+                    </p>
+                    <div class="d-flex gap-3">
+                        <a href="#" class="text-light fs-5"><i class="fab fa-facebook"></i></a>
+                        <a href="#" class="text-light fs-5"><i class="fab fa-instagram"></i></a>
+                        <a href="#" class="text-light fs-5"><i class="fab fa-twitter"></i></a>
+                        <a href="#" class="text-light fs-5"><i class="fab fa-linkedin"></i></a>
+                    </div>
+                </div>
+
+                <!-- Quick Links -->
+                <div class="col-md-4 mb-4">
+                    <h5 class="fw-bold">Quick Links</h5>
+                    <ul class="list-unstyled">
+                        <li><a href="/" class="text-light text-decoration-none d-block py-1"><i class="fas fa-home me-2"></i>Home</a></li>
+                        <li><a href="/Restaurants/Browse" class="text-light text-decoration-none d-block py-1"><i class="fas fa-store me-2"></i>Restaurants</a></li>
+                        <li><a href="/Orders" class="text-light text-decoration-none d-block py-1"><i class="fas fa-receipt me-2"></i>Orders</a></li>
+                        <li><a href="/Contact" class="text-light text-decoration-none d-block py-1"><i class="fas fa-envelope me-2"></i>Contact</a></li>
+                    </ul>
+                </div>
+
+                <!-- Contact Info -->
+                <div class="col-md-4 mb-4">
+                    <h5 class="fw-bold">Contact Us</h5>
+                    <p class="small mb-1"><i class="fas fa-map-marker-alt me-2"></i> 123 Food Street, Ahmedabad, India</p>
+                    <p class="small mb-1"><i class="fas fa-phone me-2"></i> +91 98765 43210</p>
+                    <p class="small mb-1"><i class="fas fa-envelope me-2"></i> support@restaurant.com</p>
+                    <p class="small mb-1"><i class="fas fa-clock me-2"></i> Mon - Sun: 10:00 AM - 11:00 PM</p>
+                </div>
+            </div>
+
+            <hr class="border-light">
+            <div class="text-center small">
+                &copy; @DateTime.Now.Year <strong>Restaurant Ordering System</strong>. All Rights Reserved.
+                <br>
+                <span class="text-white-50">Designed with ❤️ by Kenil Khadela</span>
+            </div>
+        </div>
+    </footer>
+
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+
+    <!-- Simple Chatbot Widget (client-side only) -->
+    <!-- 🍴 Zomato-style Chatbot Widget -->
+    <!-- Fixed-Options Chatbot Widget -->
+    <div id="chatbot" style="position: fixed; bottom: 20px; right: 20px; z-index: 1000;">
+        <div id="chatbot-window" class="card shadow" style="width: 300px; display: none;">
+            <div class="card-header d-flex justify-content-between align-items-center bg-primary text-white">
+                <strong>Assistant</strong>
+                <button type="button" class="btn-close btn-close-white" aria-label="Close" onclick="toggleChatbot()"></button>
+            </div>
+            <div class="card-body" id="chatbot-messages" style="height: 250px; overflow-y: auto;">
+                <div class="text-muted small">Hi! How can I help you today?</div>
+            </div>
+            <div class="card-footer d-flex flex-wrap gap-2">
+                <button class="btn btn-outline-primary btn-sm" onclick="sendOption('View Menu')">View Menu</button>
+                <button class="btn btn-outline-primary btn-sm" onclick="sendOption('Order Status')">Order Status</button>
+                <button class="btn btn-outline-primary btn-sm" onclick="sendOption('Payment Info')">Payment Info</button>
+                <button class="btn btn-outline-primary btn-sm" onclick="sendOption('Contact Support')">Contact Support</button>
+            </div>
+        </div>
+        <button id="chatbot-toggle" class="btn btn-primary rounded-circle" style="width:56px;height:56px;" onclick="toggleChatbot()">
+            <i class="fas fa-comments"></i>
+        </button>
+    </div>
+
+    <script>
+        function toggleChatbot() {
+            const w = document.getElementById('chatbot-window');
+            w.style.display = w.style.display === 'none' ? 'block' : 'none';
+        }
+
+        function appendChat(sender, text) {
+            const msg = document.createElement('div');
+            msg.className = sender === 'you' ? 'text-end mb-2' : 'mb-2';
+            msg.innerHTML = `<span class="badge bg-${sender === 'you' ? 'primary' : 'secondary'}">${sender}</span>
+                             <span class="ms-2">${text}</span>`;
+            const box = document.getElementById('chatbot-messages');
+            box.appendChild(msg);
+            box.scrollTop = box.scrollHeight;
+        }
+
+        function sendOption(option) {
+            appendChat('you', option);
+
+            let reply = '';
+            switch (option) {
+                case 'View Menu':
+                    reply = 'You can view our complete menu by clicking on the “Menu” option in the navigation bar.';
+                    break;
+                case 'Order Status':
+                    reply = 'Go to “Orders” > “Details” to track your current order status.';
+                    break;
+                case 'Payment Info':
+                    reply = 'We currently support Cash on Delivery and UPI payment methods.';
+                    break;
+                case 'Contact Support':
+                    reply = 'You can reach our support team via email at support@restaurant.com.';
+                    break;
+                default:
+                    reply = 'Sorry, I did not understand your selection.';
+            }
+
+            setTimeout(() => appendChat('bot', reply), 500);
+        }
+    </script>
+
+
+</body>
+</html>

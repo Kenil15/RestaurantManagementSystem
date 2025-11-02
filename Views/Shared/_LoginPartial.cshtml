@@ -1,0 +1,41 @@
+@using Microsoft.AspNetCore.Identity
+@using ForUpworkRestaurentManagement.Models
+@inject SignInManager<ApplicationUser> SignInManager
+@inject UserManager<ApplicationUser> UserManager
+
+<ul class="navbar-nav">
+    @if (SignInManager.IsSignedIn(User))
+    {
+        <li class="nav-item me-2 d-flex align-items-center">
+            <span class="navbar-text text-light">Hello, @User.Identity?.Name</span>
+        </li>
+        <li class="nav-item me-2">
+            <a class="nav-link position-relative" asp-controller="Cart" asp-action="Index">
+                <i class="fas fa-shopping-cart"></i>
+                <span id="cartCount" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" style="display:none;">0</span>
+            </a>
+        </li>
+        @if (User.IsInRole("Admin"))
+        {
+            <li class="nav-item me-2">
+                <a class="nav-link" asp-controller="Admin" asp-action="Index">Dashboard</a>
+            </li>
+        }
+        <li class="nav-item">
+            <form class="form-inline" asp-area="Identity" asp-page="/Account/Logout" asp-route-returnUrl="@Url.Action("Index", "Home", new { area = "" })">
+                <button type="submit" class="btn btn-link nav-link">Logout</button>
+            </form>
+        </li>
+    }
+    else
+    {
+        <li class="nav-item">
+            <a class="nav-link" asp-area="Identity" asp-page="/Account/Register">Register</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" asp-area="Identity" asp-page="/Account/Login">Login</a>
+        </li>
+    }
+    </ul>
+
+

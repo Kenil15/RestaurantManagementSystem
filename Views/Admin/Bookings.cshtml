@@ -1,0 +1,46 @@
+@model IEnumerable<ForUpworkRestaurentManagement.Models.TableBooking>
+@{
+    ViewData["Title"] = "Table Bookings";
+}
+<div class="container py-4">
+    <h2 class="mb-4">Table Bookings</h2>
+    <table class="table table-striped align-middle">
+        <thead>
+            <tr>
+                <th>Restaurant</th>
+                <th>Date</th>
+                <th>Time</th>
+                <th>Guests</th>
+                <th>Status</th>
+                <th class="text-end">Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var b in Model)
+            {
+                <tr>
+                    <td>@b.Restaurant?.Name</td>
+                    <td>@b.BookingDate.ToString("yyyy-MM-dd")</td>
+                    <td>@b.BookingTime.ToString(@"hh\:mm")</td>
+                    <td>@b.GuestsCount</td>
+                    <td>
+                        <span class="badge bg-@(b.Status == "Confirmed" ? "success" : b.Status == "Rejected" ? "danger" : "secondary")">@b.Status</span>
+                    </td>
+                    <td class="text-end">
+                        @if (b.Status == "Pending")
+                        {
+                            <form asp-action="ConfirmBooking" asp-controller="Admin" method="post" class="d-inline">
+                                <input type="hidden" name="id" value="@b.Id" />
+                                <button type="submit" class="btn btn-sm btn-success">Confirm</button>
+                            </form>
+                            <form asp-action="RejectBooking" asp-controller="Admin" method="post" class="d-inline ms-1">
+                                <input type="hidden" name="id" value="@b.Id" />
+                                <button type="submit" class="btn btn-sm btn-outline-danger">Reject</button>
+                            </form>
+                        }
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>

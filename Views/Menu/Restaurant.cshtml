@@ -1,0 +1,133 @@
+@model ForUpworkRestaurentManagement.ViewModels.RestaurantMenuViewModel
+@{
+    ViewData["Title"] = Model.Restaurant.Name;
+}
+<div class="container py-4">
+    <div class="row mb-4 align-items-center">
+        <div class="col-md-8">
+            <h2 class="mb-1">@Model.Restaurant.Name</h2>
+            <div class="text-muted">@Model.Restaurant.Location</div>
+            <div class="small text-muted">Hours: @Model.Restaurant.OpeningTime.ToString(@"hh\:mm") - @Model.Restaurant.ClosingTime.ToString(@"hh\:mm")</div>
+            @if (!string.IsNullOrWhiteSpace(Model.Restaurant.Description))
+            {
+                <p class="mt-2">@Model.Restaurant.Description</p>
+            }
+        </div>
+        <div class="col-md-4 text-md-end">
+            @if (!string.IsNullOrWhiteSpace(Model.Restaurant.ImageUrl))
+            {
+                <img src="@Model.Restaurant.ImageUrl" class="img-fluid rounded" alt="@Model.Restaurant.Name" style="max-height:160px; object-fit:cover;">
+            }
+        </div>
+    </div>
+
+    <div class="row g-4">
+        <div class="col-lg-8">
+            <h4 class="mb-3">Menu</h4>
+            <div class="row g-3">
+                @if (Model.MenuItems.Any())
+                {
+                    @foreach (var item in Model.MenuItems)
+                    {
+                        <div class="col-md-6">
+                            <div class="card h-100 shadow-sm">
+                                @if (!string.IsNullOrEmpty(item.ImageUrl))
+                                {
+                                    <img src="@item.ImageUrl" class="card-img-top" alt="@item.Name" style="object-fit: cover; height: 160px;">
+                                }
+                                <div class="card-body">
+                                    <div class="d-flex justify-content-between align-items-start">
+                                        <h6 class="card-title mb-1">@item.Name</h6>
+                                        <span class="badge bg-@(item.IsAvailable ? "success" : "secondary")">@(item.IsAvailable ? "Available" : "Not available")</span>
+                                    </div>
+                                    <p class="card-text small text-muted">@item.Description</p>
+                                    <div class="fw-bold">@item.Price.ToString("C")</div>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                }
+                else
+                {
+                    <div class="col-12">
+                        <div class="alert alert-info">No menu items available for this restaurant.</div>
+                    </div>
+                }
+            </div>
+        </div>
+        <div class="col-lg-4">
+            <h4 class="mb-3">Book a Table</h4>
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <form id="booking-form" asp-action="Restaurant" asp-controller="Menu" asp-route-id="@Model.Restaurant.Id" method="post">
+                        @Html.AntiForgeryToken()
+                        <div asp-validation-summary="ModelOnly" class="text-danger mb-2"></div>
+                        <div class="mb-3">
+                            <label class="form-label">Date</label>
+                            <input type="date" class="form-control" name="BookingDate" value="@Model.BookingDate?.ToString("yyyy-MM-dd")" min="@DateTime.Today.ToString("yyyy-MM-dd")" />
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Time</label>
+                            <select class="form-select" name="BookingTime">
+                                <option value="">Select time</option>
+                                @foreach (var t in Model.AvailableSlots)
+                                {
+                                    var val = t.ToString(@"hh\:mm\:ss");
+                                    <option value="@val" selected="@(Model.BookingTime.HasValue && Model.BookingTime.Value == t)">@val</option>
+                                }
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Guests</label>
+                            <input type="number" class="form-control" name="GuestsCount" value="@Model.GuestsCount" min="1" max="20" />
+                        </div>
+                        <button type="submit" class="btn btn-primary w-100">Request Booking</button>
+                    </form>
+                    <div class="form-text mt-2">Bookings are subject to confirmation by the restaurant.</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mt-5">
+        <div class="col-lg-8">
+            <h4 class="mb-3">Ratings & Reviews</h4>
+            @await Html.PartialAsync("_RestaurantReviews", Model)
+        </div>
+    </div>
+</div>
+
+<script>
+    (function(){
+        const form = document.getElementById('booking-form');
+        if(form){
+            form.addEventListener('submit', function(){
+                console.log('Request Booking clicked: submitting booking request...');
+            });
+        }
+    })();
+</script>
+
+@if (TempData["Success"] != null)
+{
+    <script>
+        console.log('Booking success: @((TempData["Success"]?.ToString() ?? "").Replace("'","\\'"))');
+    </script>
+}
+@if (!ViewData.ModelState.IsValid)
+{
+    <script>
+        console.log('Booking failed: validation errors present on the form. Listing errors:');
+        try{
+            const errs = [];
+            @foreach (var kv in ViewData.ModelState)
+            {
+                foreach (var err in kv.Value!.Errors)
+                {
+                    @:errs.push({ key: '@kv.Key', error: '@(err.ErrorMessage?.Replace("'","\\'"))' });
+                }
+            }
+            console.table(errs);
+        }catch(e){ console.warn('Could not dump ModelState errors', e); }
+    </script>
+}

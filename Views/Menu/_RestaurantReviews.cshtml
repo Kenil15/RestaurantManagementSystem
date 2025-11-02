@@ -1,0 +1,67 @@
+@model ForUpworkRestaurentManagement.ViewModels.RestaurantMenuViewModel
+<div class="card shadow-sm">
+    <div class="card-body">
+        <div class="d-flex align-items-center mb-3">
+            <div class="me-2">
+                <span class="fw-bold">@Model.AverageRating.ToString("0.0")</span>
+                <span class="text-warning">★</span>
+            </div>
+            <div class="text-muted small">(@Model.Reviews.Count review@((Model.Reviews.Count==1)?"":"s"))</div>
+        </div>
+
+        @if (Model.Reviews.Any())
+        {
+            <ul class="list-group list-group-flush mb-3">
+                @foreach (var r in Model.Reviews.Take(10))
+                {
+                    <li class="list-group-item">
+                        <div class="d-flex justify-content-between">
+                            <div>
+                                <span class="text-warning">@(new string('★',r.Rating))</span>
+                                <span class="text-muted small ms-2">@r.CreatedAt.ToLocalTime().ToString("dd MMM yyyy HH:mm")</span>
+                            </div>
+                        </div>
+                        @if (!string.IsNullOrWhiteSpace(r.Comment))
+                        {
+                            <div class="mt-1">@r.Comment</div>
+                        }
+                    </li>
+                }
+            </ul>
+        }
+        else
+        {
+            <div class="alert alert-info">No reviews yet. Be the first to review!</div>
+        }
+
+        @if (User.Identity?.IsAuthenticated ?? false)
+        {
+            <form asp-action="AddReview" asp-controller="Menu" asp-route-id="@Model.Restaurant.Id" method="post">
+                @Html.AntiForgeryToken()
+                <div class="row g-2 align-items-end">
+                    <div class="col-auto">
+                        <label class="form-label">Rating</label>
+                        <select class="form-select" name="rating" required>
+                            <option value="">Select</option>
+                            @for (var i = 5; i >= 1; i--)
+                            {
+                                <option value="@i">@i</option>
+                            }
+                        </select>
+                    </div>
+                    <div class="col">
+                        <label class="form-label">Comment (optional)</label>
+                        <input type="text" class="form-control" name="comment" maxlength="1000" />
+                    </div>
+                    <div class="col-auto">
+                        <button type="submit" class="btn btn-outline-primary">Submit</button>
+                    </div>
+                </div>
+            </form>
+        }
+        else
+        {
+            <div class="text-muted small">Please log in to leave a review.</div>
+        }
+    </div>
+</div>

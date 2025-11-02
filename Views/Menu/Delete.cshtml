@@ -1,0 +1,67 @@
+﻿@model ForUpworkRestaurentManagement.Models.MenuItem
+@{
+    ViewData["Title"] = "Delete Menu Item";
+}
+
+<div class="container">
+    <div class="row">
+        <div class="col-12">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a asp-controller="Home" asp-action="Index">Home</a></li>
+                    <li class="breadcrumb-item"><a asp-action="Manage">Manage Menu</a></li>
+                    <li class="breadcrumb-item active">Delete Item</li>
+                </ol>
+            </nav>
+        </div>
+    </div>
+
+    <div class="row justify-content-center">
+        <div class="col-lg-6">
+            <div class="card border-danger">
+                <div class="card-header bg-danger text-white">
+                    <h4 class="card-title mb-0">Confirm Deletion</h4>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-warning">
+                        <h5><i class="fas fa-exclamation-triangle"></i> Warning!</h5>
+                        <p class="mb-0">You are about to delete this menu item. This action cannot be undone.</p>
+                    </div>
+
+                    <div class="card mb-3">
+                        <div class="row g-0">
+                            @if (!string.IsNullOrEmpty(Model.ImageUrl))
+                            {
+                                <div class="col-md-4">
+                                    <img src="@Model.ImageUrl" class="img-fluid rounded-start h-100" alt="@Model.Name" style="object-fit: cover;">
+                                </div>
+                            }
+                            <div class="@(string.IsNullOrEmpty(Model.ImageUrl) ? "col-12" : "col-md-8")">
+                                <div class="card-body">
+                                    <h5 class="card-title">@Model.Name</h5>
+                                    <p class="card-text">@Model.Description</p>
+                                    <p class="card-text">
+                                        <small class="text-muted">
+                                            Category: @Model.Category?.Name<br>
+                                            Price: $@Model.Price.ToString("F2")
+                                        </small>
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <form asp-action="DeleteConfirmed" method="post">
+                        <input type="hidden" asp-for="Id" />
+                        <div class="d-flex gap-2">
+                            <button type="submit" class="btn btn-danger">
+                                <i class="fas fa-trash"></i> Confirm Delete
+                            </button>
+                            <a asp-action="Manage" class="btn btn-outline-secondary">Cancel</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

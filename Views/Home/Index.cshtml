@@ -1,0 +1,148 @@
+﻿@model ForUpworkRestaurentManagement.ViewModels.MenuViewModel
+@{
+    ViewData["Title"] = "Welcome";
+}
+
+<div class="hero-section bg-primary text-white py-5 mb-5">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-lg-6">
+                <h1 class="display-4 fw-bold">Welcome to Our Restaurant</h1>
+                <p class="lead">Experience the finest cuisine with our online ordering system. Fresh ingredients, delicious meals, delivered to your door.</p>
+                <div class="mt-4">
+                    <a asp-controller="Menu" asp-action="Index" class="btn btn-light btn-lg me-3">
+                        <i class="fas fa-utensils"></i> View Menu
+                    </a>
+                    <a asp-controller="Home" asp-action="About" class="btn btn-outline-light btn-lg">
+                        Learn More
+                    </a>
+                </div>
+            </div>
+            <div class="col-lg-6">
+                <img src="/images/restaurant-hero.jpg" alt="Restaurant" class="img-fluid rounded shadow" loading="lazy">
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container">
+    <div class="row mb-5">
+        <div class="col-12 text-center">
+            <h2 class="section-title">Featured Categories</h2>
+            <p class="text-muted">Discover our delicious offerings</p>
+        </div>
+    </div>
+
+    <div class="row">
+        @foreach (var category in Model.Categories.Take(4))
+        {
+            <div class="col-md-3 mb-4">
+                <div class="card category-card h-100 text-center">
+                    <div class="card-body">
+                        <div class="category-icon mb-3">
+                            <i class="fas fa-@(category.Name.ToLower() switch {
+                                "Starters" => "bread-slice",
+                                "Main Course" => "utensils",
+                                "Desserts" => "ice-cream",
+                                "Beverages" => "coffee",
+                                _ => "utensils"
+                            }) fa-3x text-primary"></i>
+                        </div>
+                        <h5 class="card-title">@category.Name</h5>
+                        <p class="card-text text-muted">@category.Description</p>
+                        <a asp-controller="Menu" asp-action="Index" asp-route-categoryId="@category.Id" 
+                           class="btn btn-outline-primary">Browse</a>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+
+    <div class="row mt-5">
+        <div class="col-12 text-center mb-4">
+            <h2 class="section-title">Our Other Popular Restaurants & Food Shops</h2>
+            <p class="text-muted">Pick a place and start ordering</p>
+        </div>
+
+        @{
+    var restaurants = new[] {
+        new { Name = "Spice Garden", Cuisine = "Indian • North Indian", Rating = 4.6, Time = 35, Image = "https://cdn.pixabay.com/photo/2017/06/02/18/24/indian-food-2362270_1280.jpg" },
+        new { Name = "Pasta Palace", Cuisine = "Italian • Pizza & Pasta", Rating = 4.4, Time = 30, Image = "https://cdn.pixabay.com/photo/2016/11/18/15/07/spaghetti-1835413_1280.jpg" },
+        new { Name = "Sushi World", Cuisine = "Japanese • Sushi", Rating = 4.7, Time = 40, Image = "https://cdn.pixabay.com/photo/2017/05/07/08/56/sushi-2291861_1280.jpg" },
+        new { Name = "Burger Hub", Cuisine = "American • Burgers", Rating = 4.3, Time = 25, Image = "https://cdn.pixabay.com/photo/2016/03/05/19/02/hamburger-1238246_1280.jpg" },
+        new { Name = "Sweet Tooth", Cuisine = "Desserts • Bakery", Rating = 4.5, Time = 20, Image = "https://cdn.pixabay.com/photo/2016/11/29/09/32/cupcakes-1868573_1280.jpg" },
+        new { Name = "Fresh Sips", Cuisine = "Beverages • Juices", Rating = 4.2, Time = 15, Image = "https://cdn.pixabay.com/photo/2017/05/23/18/30/smoothies-2333261_1280.jpg" },
+    };
+}
+
+
+
+        @foreach (var r in restaurants)
+        {
+            <div class="col-md-4 col-lg-3 mb-4">
+                <div class="card restaurant-card h-100">
+                    <div class="ratio ratio-16x9">
+                        <img src="@r.Image" alt="@r.Name" class="card-img-top" loading="lazy" onerror="handleImageError(this)">
+                    </div>
+                    <div class="card-body d-flex flex-column">
+                        <div class="d-flex justify-content-between align-items-start">
+                            <h5 class="card-title mb-1">@r.Name</h5>
+                            <span class="badge bg-success"><i class="fas fa-star"></i> @r.Rating</span>
+                        </div>
+                        <small class="text-muted mb-2">@r.Cuisine</small>
+                        <div class="d-flex justify-content-between align-items-center mt-auto">
+                            <small class="text-muted"><i class="fas fa-clock"></i> @r.Time–@(@r.Time + 10) mins</small>
+                            <a asp-controller="Menu" asp-action="Index" class="btn btn-sm btn-primary">View Menu</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+
+    <div class="row mt-2">
+        <div class="col-12">
+            <div class="card bg-gradient-primary text-white border-0 callout-card">
+                <div class="card-body text-center py-5">
+                    <h3 class="mb-2">Craving something delicious?</h3>
+                    <p class="lead mb-4">Explore menus from top-rated places near you.</p>
+                    <a asp-controller="Menu" asp-action="Index" class="btn btn-light btn-lg">
+                        <i class="fas fa-utensils"></i> Start Ordering
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Styles {
+    <style>
+        .hero-section {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 0 0 50% 50% / 0 0 20% 20%;
+        }
+        .category-card {
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            border: none;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .category-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 20px rgba(0,0,0,0.15);
+        }
+        .section-title {
+            position: relative;
+            padding-bottom: 15px;
+        }
+        .section-title:after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 50px;
+            height: 3px;
+            background: #007bff;
+        }
+    </style>
+}
