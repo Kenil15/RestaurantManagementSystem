@@ -3,7 +3,7 @@ Restaurant Ordering System (Portfolio Edition)
 
 Modern ASP.NET Core MVC app demonstrating a food ordering flow with Identity, menus, cart, checkout, orders, and a sleek tracking UI.
 
-Highlights (Upwork-ready)
+Highlights 
 - User auth with long-lived sessions; customer and admin roles
 - Menu browsing with availability badges and lazy-loaded images
 - Cart with optional upsell (cold drink)
